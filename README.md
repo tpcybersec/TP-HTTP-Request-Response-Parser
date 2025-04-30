@@ -2,12 +2,12 @@
 Parse/ Unparse the HTTP Request/ Response
 
 <p align="center">
-	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/downloads/truocphan/TP-HTTP-Request-Response-Parser/total" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/stars/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/forks/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="https://github.com/truocphan/TP-HTTP-Request-Response-Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/truocphan/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/downloads/tpcybersec/TP-HTTP-Request-Response-Parser/total" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/stars/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/forks/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
 	<br>
 	<a href="#"><img src="https://img.shields.io/pypi/v/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="#"><img src="https://img.shields.io/pypi/dm/TP-HTTP-Request-Response-Parser" height=30></a>
@@ -20,7 +20,7 @@ pip install TP-HTTP-Request-Response-Parser
 ```
 #### From Source:
 ```console
-git clone https://github.com/truocphan/TP-HTTP-Request-Response-Parser.git --branch <Branch/Tag>
+git clone https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser.git --branch <Branch/Tag>
 cd TP-HTTP-Request-Response-Parser
 python setup.py build
 python setup.py install
@@ -42,7 +42,7 @@ Cache-Control: max-age=0
 
 """
 
-# RequestParser = TP_HTTP_REQUEST_PARSER(open("request.txt", encoding="utf-8", errors="ignore").read()
+# RequestParser = TP_HTTP_REQUEST_PARSER(open("rawRequest.req").read())
 RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest, ordered_dict=True)
 
 print("- request_method: {}".format(RequestParser.request_method))
@@ -76,7 +76,7 @@ X-Amz-Cf-Id: eKssgTNGDCswPiQtSYFD1MRNBJCTHEbnQp4MQjtQx2B4eM7oqXYIHg==
 
 {"ok":true,"promo":[]}"""
 
-# ResponseParser = TP_HTTP_RESPONSE_PARSER(open("response.txt", encoding="utf-8", errors="ignore").read())
+# ResponseParser = TP_HTTP_RESPONSE_PARSER(open("rawResponse.res").read())
 ResponseParser = TP_HTTP_RESPONSE_PARSER(rawResponse, ordered_dict=True)
 
 print("- response_httpVersion: {}".format(ResponseParser.response_httpVersion))
