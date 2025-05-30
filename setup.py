@@ -1,8 +1,8 @@
 import setuptools
 
 setuptools.setup(
-	name="TP-HTTP-Request-Response-Parser",
-	version="2025.4.30",
+	name="tp_http_request_response_parser",
+	version="2025.5.30",
 	author="TP Cyber Security",
 	license="MIT",
 	author_email="tpcybersec2023@gmail.com",
@@ -17,5 +17,5 @@ setuptools.setup(
 		"Programming Language :: Python :: Implementation :: Jython"
 	],
 	keywords=["TPCyberSec", "HTTP Request Parser", "HTTP Response Parser"],
-	packages=["TP_HTTP_Request_Response_Parser"],
+	packages=setuptools.find_packages(),
 )

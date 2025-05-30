@@ -174,7 +174,11 @@ class TP_HTTP_REQUEST_PARSER:
 									params.set(name+separator+"headers"+separator+re.findall("^([^:]+): (.*)$", h)[0][0], re.findall("^([^:]+): (.*)$", h)[0][1])
 
 							# Value
-							params.update(name+separator+"value", re.split("\r\n\r\n|\n\n", multipart_param, 1)[-1])
+							JDKSObject = jdks.loads(urldecode(re.split("\r\n\r\n|\n\n", multipart_param, 1)[-1]), dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+							if JDKSObject:
+								params.update(name+separator+"value", JDKSObject.getObject())
+							else:
+								params.update(name+separator+"value", re.split("\r\n\r\n|\n\n", multipart_param, 1)[-1])
 
 						self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "multipart", "boundary": boundary[2:], "data": params.getObject() })
 					except Exception as e:
@@ -184,7 +188,11 @@ class TP_HTTP_REQUEST_PARSER:
 
 					for NameValue in reqBody.split("&"):
 						if len(re.split("=", NameValue, 1)) == 2:
-							params.set(re.split("=", NameValue, 1)[0], re.split("=", NameValue, 1)[1])
+							JDKSObject = jdks.loads(urldecode(re.split("=", NameValue, 1)[1]), dupSign_start=dupSign_start, dupSign_end=dupSign_end, ordered_dict=ordered_dict)
+							if JDKSObject:
+								params.set(re.split("=", NameValue, 1)[0], JDKSObject.getObject())
+							else:
+								params.set(re.split("=", NameValue, 1)[0], re.split("=", NameValue, 1)[1])
 						else:
 							params.set(re.split("=", NameValue, 1)[0], "")
 
@@ -308,7 +316,12 @@ class TP_HTTP_REQUEST_PARSER:
 								else:
 									body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=str(Jget_data["value"][paramName]["headers"][h]))
 
-						body += "\r\n\r\n"+Jget_data["value"][paramName]["value"]+"\r\n"
+						if type(Jget_data["value"][paramName]["value"]) in [OrderedDict, dict, list]:
+							body += "\r\n\r\n"+jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["value"]).dumps(separators=(",",":"))+"\r\n"
+						elif type(Jget_data["value"][paramName]["value"]) in [unicode, str]:
+							body += "\r\n\r\n"+Jget_data["value"][paramName]["value"]+"\r\n"
+						else:
+							body += "\r\n\r\n"+str(Jget_data["value"][paramName]["value"])+"\r\n"
 
 					body += self.request_body.get("boundary")["value"]+"--\r\n"
 
