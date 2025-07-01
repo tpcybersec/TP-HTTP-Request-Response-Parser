@@ -1,8 +1,9 @@
+from TP_HTTP_Request_Response_Parser import TP_HTTP_Request_Response_Parser_VERSION
 import setuptools
 
 setuptools.setup(
-	name="tp_http_request_response_parser",
-	version="2025.5.30",
+	name="TP-HTTP-Request-Response-Parser",
+	version=TP_HTTP_Request_Response_Parser_VERSION,
 	author="TP Cyber Security",
 	license="MIT",
 	author_email="tpcybersec2023@gmail.com",
