@@ -1,17 +1,18 @@
-# TP-HTTP-Request-Response-Parser - PyPI
-Parse/ Unparse the HTTP Request/ Response
-
-<p align="center">
-	<a href="https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/downloads/tpcybersec/TP-HTTP-Request-Response-Parser/total" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/stars/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="#"><img src="https://img.shields.io/github/forks/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
-	<a href="https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/tpcybersec/TP-HTTP-Request-Response-Parser" height=30></a>
+<div align="center">
+	<h1>TP-HTTP-Request-Response-Parser - PyPI</h1>
+	<i>Parse/ Unparse the HTTP Request/ Response</i>
+	<br><br>
+	<a href="https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser/releases/"><img src="https://img.shields.io/github/release/TPCyberSec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/downloads/TPCyberSec/TP-HTTP-Request-Response-Parser/total" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/stars/TPCyberSec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/github/forks/TPCyberSec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser/issues?q=is%3Aopen+is%3Aissue"><img src="https://img.shields.io/github/issues/TPCyberSec/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser/issues?q=is%3Aissue+is%3Aclosed"><img src="https://img.shields.io/github/issues-closed/TPCyberSec/TP-HTTP-Request-Response-Parser" height=30></a>
 	<br>
 	<a href="#"><img src="https://img.shields.io/pypi/v/TP-HTTP-Request-Response-Parser" height=30></a>
+	<a href="#"><img src="https://img.shields.io/pypi/pyversions/TP-HTTP-Request-Response-Parser" height=30></a>
 	<a href="#"><img src="https://img.shields.io/pypi/dm/TP-HTTP-Request-Response-Parser" height=30></a>
-</p>
+</div>
 
 ## Installation
 #### From PyPI:
@@ -20,15 +21,15 @@ pip install TP-HTTP-Request-Response-Parser
 ```
 #### From Source:
 ```console
-git clone https://github.com/tpcybersec/TP-HTTP-Request-Response-Parser.git --branch <Branch/Tag>
+git clone https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser.git --branch <Branch/Tag>
 cd TP-HTTP-Request-Response-Parser
-python setup.py build
-python setup.py install
+python -m build
+python -m pip install dist/TP_HTTP_Request_Response_Parser-<version>-py3-none-any.whl
 ```
 
 ## Basic Usage
 ```
-from TP_HTTP_Request_Response_Parser import TP_HTTP_REQUEST_PARSER, TP_HTTP_RESPONSE_PARSER
+from tp_http_request_response_parser import TP_HTTP_REQUEST_PARSER, TP_HTTP_RESPONSE_PARSER
 
 # Parsing HTTP Request
 rawRequest = """GET /v1/promo/extension HTTP/2

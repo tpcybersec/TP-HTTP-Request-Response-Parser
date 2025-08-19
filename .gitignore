@@ -1,10 +1,9 @@
 *
 !/.gitignore
 !/LICENSE
-!/MANIFEST.in
+!/pyproject.toml
 !/README.md
 !/requirements.txt
 !/SECURITY.md
-!/setup.py
 !/TP_HTTP_Request_Response_Parser/
 !/TP_HTTP_Request_Response_Parser/__init__.py
