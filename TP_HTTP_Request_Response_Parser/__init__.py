@@ -305,8 +305,10 @@ class TP_HTTP_REQUEST_PARSER:
 	def unparse(self, update_content_length=False):
 		method = path = queryParams = fragment = httpVersion = headers = cookies = body = ""
 
-		if type(self.request_method) in [unicode, str]:
+		if type(self.request_method) == str:
 			method = urlencode(self.request_method)
+		elif type(self.request_method) == unicode:
+			method = urlencode(self.request_method.decode("utf-8").encode("utf-8"))
 		elif type(self.request_method) == bytes:
 			method = urlencode(self.bytes_to_string(self.request_method))
 		else:
@@ -317,8 +319,10 @@ class TP_HTTP_REQUEST_PARSER:
 				path = self.request_path
 				for k in self.request_pathParams.getObject():
 					if type(k) in [unicode, str]:
-						if type(self.request_pathParams.get(k)["value"]) in [unicode, str]:
+						if type(self.request_pathParams.get(k)["value"]) == str:
 							path = path.replace(k, urlencode(self.request_pathParams.get(k)["value"]))
+						elif type(self.request_pathParams.get(k)["value"]) == unicode:
+							path = path.replace(k, urlencode(self.request_pathParams.get(k)["value"].decode("utf-8").encode("utf-8")))
 						elif type(self.request_pathParams.get(k)["value"]) == bytes:
 							path = path.replace(k, urlencode(self.bytes_to_string(self.request_pathParams.get(k)["value"])))
 						else:
@@ -334,8 +338,10 @@ class TP_HTTP_REQUEST_PARSER:
 						Jget = self.request_queryParams.get(k)
 						if type(Jget["value"]) in [OrderedDict, dict, list]:
 							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))))
-						elif type(Jget["value"]) in [unicode, str]:
+						elif type(Jget["value"]) == str:
 							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(Jget["value"])))
+						elif type(Jget["value"]) == unicode:
+							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(Jget["value"].decode("utf-8").encode("utf-8"))))
 						elif type(Jget["value"]) == bytes:
 							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(self.bytes_to_string(Jget["value"]))))
 						else:
@@ -346,15 +352,19 @@ class TP_HTTP_REQUEST_PARSER:
 		if len(queryParams) > 0: queryParams = "?"+queryParams
 
 		if len(self.request_fragment) > 0:
-			if type(self.request_fragment) in [unicode, str]:
+			if type(self.request_fragment) == str:
 				fragment = "#"+urlencode(self.request_fragment)
+			elif type(self.request_fragment) == unicode:
+				fragment = "#"+urlencode(self.request_fragment.decode("utf-8").encode("utf-8"))
 			elif type(self.request_fragment) == bytes:
 				fragment = "#"+urlencode(self.bytes_to_string(self.request_fragment))
 			else:
 				fragment = "#"+urlencode(str(self.request_fragment))
 
-		if type(self.request_httpVersion) in [unicode, str]:
+		if type(self.request_httpVersion) == str:
 			httpVersion = urlencode(self.request_httpVersion)
+		elif type(self.request_httpVersion) == unicode:
+			httpVersion = urlencode(self.request_httpVersion.decode("utf-8").encode("utf-8"))
 		elif type(self.request_httpVersion) == bytes:
 			httpVersion = urlencode(self.bytes_to_string(self.request_httpVersion))
 		else:
