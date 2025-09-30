@@ -18,12 +18,7 @@ else:
 
 class TP_HTTP_REQUEST_PARSER:
 	def __init__(self, rawRequest, separator="||", parse_index="$", dupSign_start="{{{", dupSign_end="}}}", ordered_dict=False, skipDuplicated=True):
-		self.separator = separator
-		self.parse_index = parse_index
-		self.dupSign_start = dupSign_start
-		self.dupSign_end = dupSign_end
-		self.ordered_dict = ordered_dict
-		self.skipDuplicated = skipDuplicated
+		self.separator = separator; self.parse_index = parse_index; self.dupSign_start = dupSign_start; self.dupSign_end = dupSign_end; self.ordered_dict = ordered_dict; self.skipDuplicated = skipDuplicated
 
 		self.urlencode = {
 			"HTTPHeaders": {},
@@ -31,21 +26,14 @@ class TP_HTTP_REQUEST_PARSER:
 			"RequestBody": {}
 		}
 
+		requestHeader = requestBody = ""
 		if type(rawRequest) == bytes:
-			requestHeader = self.bytes_to_string(re.split(b"\r\n\r\n|\n\n", rawRequest, 1)[0])
-			try:
-				requestBody = self.bytes_to_string(re.split(b"\r\n\r\n|\n\n", rawRequest, 1)[1])
-			except Exception as e:
-				requestBody = ""
-		elif type(rawRequest) in [unicode, str] :
-			requestHeader = re.split("\r\n\r\n|\n\n", rawRequest, 1)[0]
-			try:
-				requestBody = re.split("\r\n\r\n|\n\n", rawRequest, 1)[1]
-			except Exception as e:
-				requestBody = ""
-		else:
-			requestHeader = ""
-			requestBody = ""
+			rawRequest = self.bytes_to_string(rawRequest)
+
+		requestHeader = re.split("\r\n\r\n|\n\n", rawRequest, 1)[0]
+		try:
+			requestBody = re.split("\r\n\r\n|\n\n", rawRequest, 1)[1]
+		except Exception as e: pass
 
 		## Request Method ##
 		try:
@@ -54,23 +42,16 @@ class TP_HTTP_REQUEST_PARSER:
 			self.request_method = ""
 		##
 
-		## Request Path ##
+		## Request Paths ##
+		self.request_paths = jdks.loads("[]", ordered_dict=self.ordered_dict)
 		try:
-			self.request_path = urldecode(urlparse(re.split("\r\n|\n", requestHeader)[0].split(" ")[1]).path)
-		except Exception as e:
-			self.request_path = ""
-		##
-
-		## Request Path Param ##
-		self.request_pathParams = jdks.loads("{}", ordered_dict=self.ordered_dict)
-		if len(self.request_path) > 0:
-			for path_split in self.request_path.split("/"):
-				if len(path_split) > 0 and re.match("^<(.+?)>$", path_split):
-					JDKSObject = jdks.loads(urldecode(path_split[1:-1]), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
-					if JDKSObject:
-						self.request_pathParams.update(path_split, JDKSObject.getObject(), allow_new_key=True)
-					else:
-						self.request_pathParams.update(path_split, urldecode(path_split[1:-1]), allow_new_key=True)
+			for pathPart in urlparse(re.split("\r\n|\n", requestHeader)[0].split(" ")[1]).path[1:].split("/"):
+				JDKSObject = jdks.loads(urldecode(pathPart), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
+				if JDKSObject:
+					self.request_paths.insert(None, JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
+				else:
+					self.request_paths.insert(None, urldecode(pathPart), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
+		except Exception as e: pass
 		##
 
 		## Request Query ##
@@ -88,8 +69,7 @@ class TP_HTTP_REQUEST_PARSER:
 							self.request_queryParams.set(urldecode(kv[0]), urldecode(kv[1]), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
 					else:
 						self.request_queryParams.set(urldecode(kv[0]), "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
-		except Exception as e:
-			pass
+		except Exception as e: pass
 		##
 
 		## Request Fragment ##
@@ -122,8 +102,7 @@ class TP_HTTP_REQUEST_PARSER:
 							self.request_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
 						else:
 							self.request_headers.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
-		except Exception as e:
-			pass
+		except Exception as e: pass
 		##
 
 		## Request Cookies ##
@@ -267,40 +246,35 @@ class TP_HTTP_REQUEST_PARSER:
 	def bytes_to_string(self, data):
 		# Try plain UTF-8
 		try:
-			return data.decode("utf-8")
-		except UnicodeDecodeError:
-			pass
+			return data.decode("utf8")
+		except Exception: pass
 
 		# Try gzip
 		try:
 			with gzip.GzipFile(fileobj=BytesIO(data)) as f:
 				decompressed = f.read()
-				return decompressed.decode("utf-8")
-		except Exception:
-			pass
+				return decompressed.decode("utf8")
+		except Exception: pass
 
 		# Try raw deflate (zlib wbits=-15)
 		try:
 			decompressed = zlib.decompress(data, wbits=-15)
-			return decompressed.decode("utf-8")
-		except Exception:
-			pass
+			return decompressed.decode("utf8")
+		except Exception: pass
 
 		# Try zlib default (wbits=+zlib format)
 		try:
 			decompressed = zlib.decompress(data)
-			return decompressed.decode("utf-8")
-		except Exception:
-			pass
+			return decompressed.decode("utf8")
+		except Exception: pass
 
 		# Try latin1 as a fallback for decoding weird encodings (1:1 byte mapping)
 		try:
 			return data.decode("latin1")
-		except Exception:
-			pass
+		except Exception: pass
 
 		# Final fallback: replace invalid chars
-		return data.decode("utf-8", errors="replace")
+		return data.decode("utf8", errors="replace")
 
 	def unparse(self, update_content_length=False):
 		method = path = queryParams = fragment = httpVersion = headers = cookies = body = ""
@@ -308,30 +282,30 @@ class TP_HTTP_REQUEST_PARSER:
 		if type(self.request_method) == str:
 			method = urlencode(self.request_method)
 		elif type(self.request_method) == unicode:
-			method = urlencode(self.request_method.decode("utf-8").encode("utf-8"))
+			method = urlencode(self.request_method.decode("utf8").encode("utf8"))
 		elif type(self.request_method) == bytes:
 			method = urlencode(self.bytes_to_string(self.request_method))
 		else:
 			method = urlencode(str(self.request_method))
 
 		try:
-			if type(self.request_path) in [unicode, str] and (type(self.request_pathParams) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.request_pathParams) and self.request_pathParams.__module__ == "json_duplicate_keys")):
-				path = self.request_path
-				for k in self.request_pathParams.getObject():
-					if type(k) in [unicode, str]:
-						if type(self.request_pathParams.get(k)["value"]) == str:
-							path = path.replace(k, urlencode(self.request_pathParams.get(k)["value"]))
-						elif type(self.request_pathParams.get(k)["value"]) == unicode:
-							path = path.replace(k, urlencode(self.request_pathParams.get(k)["value"].decode("utf-8").encode("utf-8")))
-						elif type(self.request_pathParams.get(k)["value"]) == bytes:
-							path = path.replace(k, urlencode(self.bytes_to_string(self.request_pathParams.get(k)["value"])))
-						else:
-							path = path.replace(k, urlencode(str(self.request_pathParams.get(k)["value"])))
-		except Exception as e:
-			pass
+			if isinstance(self.request_paths, jdks.JSON_DUPLICATE_KEYS):
+				for pathPart in self.request_paths.getObject():
+					if type(pathPart) in [OrderedDict, dict, list]:
+						path += "/"+urlencode(jdks.JSON_DUPLICATE_KEYS(pathPart).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
+					elif type(pathPart) == str:
+						path += "/"+urlencode(pathPart)
+					elif type(pathPart) == unicode:
+						path += "/"+urlencode(pathPart.decode("utf8").encode("utf8"))
+					elif type(pathPart) == bytes:
+						path += "/"+urlencode(self.bytes_to_string(pathPart))
+					else:
+						path += "/"+urlencode(str(pathPart))
+		except Exception as e: pass
+		if len(path) == 0: path = "/"
 
 		try:
-			if type(self.request_queryParams) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.request_queryParams) and self.request_queryParams.__module__ == "json_duplicate_keys"):
+			if isinstance(self.request_queryParams, jdks.JSON_DUPLICATE_KEYS):
 				query = []
 				for k in self.request_queryParams.getObject():
 					if type(k) in [unicode, str]:
@@ -341,21 +315,20 @@ class TP_HTTP_REQUEST_PARSER:
 						elif type(Jget["value"]) == str:
 							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(Jget["value"])))
 						elif type(Jget["value"]) == unicode:
-							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(Jget["value"].decode("utf-8").encode("utf-8"))))
+							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(Jget["value"].decode("utf8").encode("utf8"))))
 						elif type(Jget["value"]) == bytes:
 							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(self.bytes_to_string(Jget["value"]))))
 						else:
 							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(str(Jget["value"]))))
 				queryParams = "&".join(query)
-		except Exception as e:
-			pass
+		except Exception as e: pass
 		if len(queryParams) > 0: queryParams = "?"+queryParams
 
 		if len(self.request_fragment) > 0:
 			if type(self.request_fragment) == str:
 				fragment = "#"+urlencode(self.request_fragment)
 			elif type(self.request_fragment) == unicode:
-				fragment = "#"+urlencode(self.request_fragment.decode("utf-8").encode("utf-8"))
+				fragment = "#"+urlencode(self.request_fragment.decode("utf8").encode("utf8"))
 			elif type(self.request_fragment) == bytes:
 				fragment = "#"+urlencode(self.bytes_to_string(self.request_fragment))
 			else:
@@ -364,14 +337,14 @@ class TP_HTTP_REQUEST_PARSER:
 		if type(self.request_httpVersion) == str:
 			httpVersion = urlencode(self.request_httpVersion)
 		elif type(self.request_httpVersion) == unicode:
-			httpVersion = urlencode(self.request_httpVersion.decode("utf-8").encode("utf-8"))
+			httpVersion = urlencode(self.request_httpVersion.decode("utf8").encode("utf8"))
 		elif type(self.request_httpVersion) == bytes:
 			httpVersion = urlencode(self.bytes_to_string(self.request_httpVersion))
 		else:
 			httpVersion = urlencode(str(self.request_httpVersion))
 
 		try:
-			if type(self.request_body) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.request_body) and self.request_body.__module__ == "json_duplicate_keys"):
+			if isinstance(self.request_body, jdks.JSON_DUPLICATE_KEYS):
 				Jget_dataType = self.request_body.get("dataType")
 				Jget_data = self.request_body.get("data")
 				if Jget_dataType["value"] == "json":
@@ -440,14 +413,13 @@ class TP_HTTP_REQUEST_PARSER:
 						body = self.bytes_to_string(Jget_data["value"])
 					else:
 						body = str(Jget_data["value"])
-		except Exception as e:
-			pass
+		except Exception as e: pass
 
 		if update_content_length:
 			self.request_headers.update("Content-Length", len(body), allow_new_key=True, case_insensitive=True)
 
 		try:
-			if type(self.request_cookies) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.request_cookies) and self.request_cookies.__module__ == "json_duplicate_keys"):
+			if isinstance(self.request_cookies, jdks.JSON_DUPLICATE_KEYS):
 				for k in self.request_cookies.getObject():
 					if type(k) in [unicode, str]:
 						Jget = self.request_cookies.get(k)
@@ -465,11 +437,10 @@ class TP_HTTP_REQUEST_PARSER:
 
 				if len(cookies) > 0:
 					self.request_headers.update("Cookie", cookies[:-2], allow_new_key=True, case_insensitive=True)
-		except Exception as e:
-			pass
+		except Exception as e: pass
 
 		try:
-			if type(self.request_headers) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.request_headers) and self.request_headers.__module__ == "json_duplicate_keys"):
+			if isinstance(self.request_headers, jdks.JSON_DUPLICATE_KEYS):
 				for k in self.request_headers.getObject():
 					if type(k) in [unicode, str]:
 						Jget = self.request_headers.get(k)
@@ -484,22 +455,17 @@ class TP_HTTP_REQUEST_PARSER:
 							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=self.bytes_to_string(Jget["value"]))
 						else:
 							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=str(Jget["value"]))
-		except Exception as e:
-			pass
+		except Exception as e: pass
 
-		return method+" "+path+queryParams+fragment+" "+httpVersion+headers+"\r\n\r\n"+body
+		unparseRequest = method+" "+path+queryParams+fragment+" "+httpVersion+headers+"\r\n\r\n"+body
+		return unparseRequest
 
 
 
 
 class TP_HTTP_RESPONSE_PARSER:
 	def __init__(self, rawResponse, separator="||", parse_index="$", dupSign_start="{{{", dupSign_end="}}}", ordered_dict=False, skipDuplicated=True):
-		self.separator = separator
-		self.parse_index = parse_index
-		self.dupSign_start = dupSign_start
-		self.dupSign_end = dupSign_end
-		self.ordered_dict = ordered_dict
-		self.skipDuplicated = skipDuplicated
+		self.separator = separator; self.parse_index = parse_index; self.dupSign_start = dupSign_start; self.dupSign_end = dupSign_end; self.ordered_dict = ordered_dict; self.skipDuplicated = skipDuplicated
 
 		self.urlencode = {
 			"ResponseHeaders": {},
@@ -507,21 +473,13 @@ class TP_HTTP_RESPONSE_PARSER:
 			"ResponseBody": {}
 		}
 
+		responseHeader = responseBody = ""
 		if type(rawResponse) == bytes:
-			responseHeader = self.bytes_to_string(re.split(b"\r\n\r\n|\n\n", rawResponse, 1)[0])
-			try:
-				responseBody = self.bytes_to_string(re.split(b"\r\n\r\n|\n\n", rawResponse, 1)[1])
-			except Exception as e:
-				responseBody = ""
-		elif type(rawResponse) in [unicode, str] :
-			responseHeader = re.split("\r\n\r\n|\n\n", rawResponse, 1)[0]
-			try:
-				responseBody = re.split("\r\n\r\n|\n\n", rawResponse, 1)[1]
-			except Exception as e:
-				responseBody = ""
-		else:
-			responseHeader = ""
-			responseBody = ""
+			rawResponse = self.bytes_to_string(rawResponse)
+		responseHeader = re.split("\r\n\r\n|\n\n", rawResponse, 1)[0]
+		try:
+			responseBody = re.split("\r\n\r\n|\n\n", rawResponse, 1)[1]
+		except Exception as e: pass
 
 		## Response HTTP Version ##
 		try:
@@ -560,8 +518,7 @@ class TP_HTTP_RESPONSE_PARSER:
 							self.response_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
 						else:
 							self.response_headers.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
-		except Exception as e:
-			pass
+		except Exception as e: pass
 		##
 
 		## Response Cookies ##
@@ -612,40 +569,35 @@ class TP_HTTP_RESPONSE_PARSER:
 	def bytes_to_string(self, data):
 		# Try plain UTF-8
 		try:
-			return data.decode("utf-8")
-		except UnicodeDecodeError:
-			pass
+			return data.decode("utf8")
+		except Exception: pass
 
 		# Try gzip
 		try:
 			with gzip.GzipFile(fileobj=BytesIO(data)) as f:
 				decompressed = f.read()
-				return decompressed.decode("utf-8")
-		except Exception:
-			pass
+				return decompressed.decode("utf8")
+		except Exception: pass
 
 		# Try raw deflate (zlib wbits=-15)
 		try:
 			decompressed = zlib.decompress(data, wbits=-15)
-			return decompressed.decode("utf-8")
-		except Exception:
-			pass
+			return decompressed.decode("utf8")
+		except Exception: pass
 
 		# Try zlib default (wbits=+zlib format)
 		try:
 			decompressed = zlib.decompress(data)
-			return decompressed.decode("utf-8")
-		except Exception:
-			pass
+			return decompressed.decode("utf8")
+		except Exception: pass
 
 		# Try latin1 as a fallback for decoding weird encodings (1:1 byte mapping)
 		try:
 			return data.decode("latin1")
-		except Exception:
-			pass
+		except Exception: pass
 
 		# Final fallback: replace invalid chars
-		return data.decode("utf-8", errors="replace")
+		return data.decode("utf8", errors="replace")
 
 	def unparse(self, update_content_length=False):
 		httpVersion = statusCode = statusText = headers = body = ""
@@ -672,7 +624,7 @@ class TP_HTTP_RESPONSE_PARSER:
 			statusText = str(self.response_statusText)
 
 		try:
-			if type(self.response_body) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.response_body) and self.response_body.__module__ == "json_duplicate_keys"):
+			if isinstance(self.response_body, jdks.JSON_DUPLICATE_KEYS):
 				if self.response_body.get("dataType")["value"] == "json":
 					if "json" in self.urlencode["ResponseBody"]:
 						body = urlencode(jdks.JSON_DUPLICATE_KEYS(self.response_body.get("data")["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
@@ -680,14 +632,13 @@ class TP_HTTP_RESPONSE_PARSER:
 						body = jdks.JSON_DUPLICATE_KEYS(self.response_body.get("data")["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)
 				elif self.response_body.get("dataType")["value"] == "unknown":
 					body = self.response_body.get("data")["value"]
-		except Exception as e:
-			pass
+		except Exception as e: pass
 
 		if update_content_length:
 			self.response_headers.update("Content-Length", len(body), allow_new_key=True, case_insensitive=True)
 
 		try:
-			if type(self.response_headers) == jdks.JSON_DUPLICATE_KEYS or ("__module__" in dir(self.response_headers) and self.response_headers.__module__ == "json_duplicate_keys"):
+			if isinstance(self.response_headers, jdks.JSON_DUPLICATE_KEYS):
 				for k in self.response_headers.getObject():
 					if type(k) in [unicode, str]:
 						Jget = self.response_headers.get(k)
@@ -702,7 +653,7 @@ class TP_HTTP_RESPONSE_PARSER:
 							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=self.bytes_to_string(Jget["value"]))
 						else:
 							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=str(Jget["value"]))
-		except Exception as e:
-			pass
+		except Exception as e: pass
 
-		return httpVersion+" "+statusCode+" "+statusText+headers+"\r\n\r\n"+body
+		unparseResponse = httpVersion+" "+statusCode+" "+statusText+headers+"\r\n\r\n"+body
+		return unparseResponse

@@ -39,8 +39,7 @@ python -m pip install dist/tp_http_request_response_parser-<version>-py3-none-an
 # 📘 Basic Usage
 ### TP_HTTP_REQUEST_PARSER
 - **request_method**: returns the HTTP method (e.g., `GET`, `POST`)
-- **request_path**: returns the request path (e.g., `/api/v1/data`)
-- **request_pathParams**: returns parsed path parameters as JSON_DUPLICATE_KEYS object
+- **request_paths**: returns the request path parts as JSON_DUPLICATE_KEYS object
 - **request_queryParams**: returns parsed query parameters as JSON_DUPLICATE_KEYS object
 - **request_fragment**: returns the URL fragment
 - **request_httpVersion**: returns the HTTP version (e.g., `HTTP/1.1`, `HTTP/2`)
@@ -67,8 +66,7 @@ Cache-Control: max-age=0
 RequestParser = TP_HTTP_REQUEST_PARSER(rawRequest, ordered_dict=True)
 
 print("- request_method: {}".format(RequestParser.request_method))
-print("- request_path: {}".format(RequestParser.request_path))
-print("- request_pathParams: {}".format(RequestParser.request_pathParams.dumps(indent=4)))
+print("- request_paths: {}".format(RequestParser.request_paths.dumps(indent=4)))
 print("- request_queryParams: {}".format(RequestParser.request_queryParams.dumps(indent=4)))
 print("- request_fragment: {}".format(RequestParser.request_fragment))
 print("- request_httpVersion: {}".format(RequestParser.request_httpVersion))
@@ -125,6 +123,10 @@ print(ResponseParser.unparse(update_content_length=True))
 
 ---
 # 📝 CHANGELOG
+### [TP-HTTP-Request-Response-Parser v2025.9.30](https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser/tree/2025.9.30)
+- **Updated**: Merged `request_path` and `request_pathParams` into `request_paths`. **request_paths**: returns the request path parts as JSON_DUPLICATE_KEYS object
+- **Updated**: Fixed issues related to encoding
+
 ### [TP-HTTP-Request-Response-Parser v2025.8.30](https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser/tree/2025.8.30)
 - Support for parsing and reconstructing HTTP Request/ Response
 - Access all HTTP fields as JSON_DUPLICATE_KEYS objects

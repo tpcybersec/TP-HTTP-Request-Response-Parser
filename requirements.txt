@@ -1,1 +1,1 @@
-json-duplicate-keys>=2025.8.19
+json-duplicate-keys>=2025.9.30
