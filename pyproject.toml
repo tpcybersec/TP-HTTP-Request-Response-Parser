@@ -4,26 +4,27 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "tp-http-request-response-parser"
-version = "2025.9.30"
+version = "2026.5.18"
 description = "Parse/ Unparse the HTTP Request/ Response"
 readme = { file = "README.md", content-type = "text/markdown" }
 license = { text = "MIT" }
 keywords = ["TPCyberSec", "HTTP Request Parser", "HTTP Response Parser"]
+
 classifiers = [
-  "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: Implementation :: Jython"
+	"Programming Language :: Python :: 3"
 ]
 
 authors = [
-  { name = "TP Cyber Security", email = "tpcybersec2023@gmail.com" }
+	{ name = "TP Cyber Security", email = "tpcybersec2023@gmail.com" }
 ]
 
-dependencies = [
-  "json-duplicate-keys>=2025.9.30"
-]
+dynamic = ["dependencies"]
+[tool.setuptools.dynamic]
+dependencies = { file = [ "requirements.txt" ] }
 
 [project.urls]
 Homepage = "https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser"
 
-[tool.setuptools]
-packages = ["tp_http_request_response_parser"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["TP_HTTP_Request_Response_Parser"]

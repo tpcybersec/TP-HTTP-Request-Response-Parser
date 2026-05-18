@@ -1,4 +1,5 @@
 import json_duplicate_keys as jdks
+from TP_Generator import Utils
 from collections import OrderedDict
 import re, platform
 import gzip, zlib
@@ -37,7 +38,7 @@ class TP_HTTP_REQUEST_PARSER:
 
 		## Request Method ##
 		try:
-			self.request_method = urldecode(re.split("\r\n|\n", requestHeader)[0].split(" ")[0])
+			self.request_method = re.split("\r\n|\n", requestHeader)[0].split(" ")[0]
 		except Exception as e:
 			self.request_method = ""
 		##
@@ -50,7 +51,7 @@ class TP_HTTP_REQUEST_PARSER:
 				if JDKSObject:
 					self.request_paths.insert(None, JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 				else:
-					self.request_paths.insert(None, urldecode(pathPart), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
+					self.request_paths.insert(None, pathPart, separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 		except Exception as e: pass
 		##
 
@@ -64,24 +65,24 @@ class TP_HTTP_REQUEST_PARSER:
 					if len(kv) == 2:
 						JDKSObject = jdks.loads(urldecode(kv[1]), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 						if JDKSObject:
-							self.request_queryParams.set(urldecode(kv[0]), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.request_queryParams.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 						else:
-							self.request_queryParams.set(urldecode(kv[0]), urldecode(kv[1]), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.request_queryParams.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 					else:
-						self.request_queryParams.set(urldecode(kv[0]), "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+						self.request_queryParams.set(kv[0], "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 		except Exception as e: pass
 		##
 
 		## Request Fragment ##
 		try:
-			self.request_fragment = urldecode(urlparse(re.split("\r\n|\n", requestHeader)[0].split(" ")[1]).fragment)
+			self.request_fragment = urlparse(re.split("\r\n|\n", requestHeader)[0].split(" ")[1]).fragment
 		except Exception as e:
 			self.request_fragment = ""
 		##
 
 		## Request HTTP Version ##
 		try:
-			self.request_httpVersion = urldecode(re.split("\r\n|\n", requestHeader)[0].split(" ")[2])
+			self.request_httpVersion = re.split("\r\n|\n", requestHeader)[0].split(" ")[2]
 		except Exception as e:
 			self.request_httpVersion = ""
 		##
@@ -94,14 +95,14 @@ class TP_HTTP_REQUEST_PARSER:
 					kv = re.findall("^([^:]+): (.*)$", header)[0]
 					JDKSObject = jdks.loads(kv[1], dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 					if JDKSObject:
-						self.request_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+						self.request_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 					else:
 						JDKSObject = jdks.loads(urldecode(kv[1]), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 						if JDKSObject:
 							self.urlencode["HTTPHeaders"][kv[0]] = True
-							self.request_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.request_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 						else:
-							self.request_headers.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.request_headers.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 		except Exception as e: pass
 		##
 
@@ -113,16 +114,16 @@ class TP_HTTP_REQUEST_PARSER:
 				if len(kv) == 2:
 					JDKSObject = jdks.loads(kv[1].strip(), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 					if JDKSObject:
-						self.request_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+						self.request_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 					else:
 						JDKSObject = jdks.loads(urldecode(kv[1].strip()), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 						if JDKSObject:
 							self.urlencode["HTTPCookies"][kv[0].strip()] = True
-							self.request_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.request_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 						else:
-							self.request_cookies.set(kv[0].strip(), kv[1].strip(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.request_cookies.set(kv[0].strip(), kv[1].strip(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 				else:
-					self.request_cookies.set(kv[0].strip(), "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+					self.request_cookies.set(kv[0].strip(), "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 		##
 
 		## Request Body ##
@@ -152,6 +153,7 @@ class TP_HTTP_REQUEST_PARSER:
 					# Line index -2: ------WebKitFormBoundarylSMLylneEk9ZsCHL--
 					# Line index -1: 
 					elif re.split("\r\n|\n", reqBody)[-1] == "" and re.split("\r\n|\n", reqBody)[0]+"--"==re.split("\r\n|\n", reqBody)[-2]:
+						self.urlencode["RequestBody"]["multipart"] = {}
 						boundary = re.split("\r\n|\n", reqBody)[0]
 
 						try:
@@ -168,7 +170,7 @@ class TP_HTTP_REQUEST_PARSER:
 										"filename": filename,
 										"headers": {},
 										"value": ""
-									}, separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+									}, separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 								# name
 								elif re.match("^Content-Disposition: form-data; name=\".*?\"$", re.split("\r\n|\n", multipart_param)[0], re.IGNORECASE):
 									result = re.findall("^Content-Disposition: form-data; name=\"(.*?)\"$", re.split("\r\n|\n", multipart_param)[0], re.IGNORECASE)
@@ -177,43 +179,44 @@ class TP_HTTP_REQUEST_PARSER:
 									params.set(name, {
 											"headers": {},
 											"value": ""
-									}, separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+									}, separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 								else:
 									continue
 
 								# Headers
-								self.urlencode["RequestBody"]["multipart"] = { "headers": {} }
+								self.urlencode["RequestBody"]["multipart"][name] = { "headers": {} }
 								for h in re.split("\r\n|\n", re.split("\r\n\r\n|\n\n", multipart_param, 1)[0])[1:]:
 									if re.match("^[^:]+: .*$", h):
 										kv = re.findall("^([^:]+): (.*)$", h)[0]
 										JDKSObject = jdks.loads(kv[1], dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 										if JDKSObject:
-											params.set(name+self.separator+"headers"+self.separator+kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+											params.set(name+self.separator+"headers"+self.separator+kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 										else:
 											JDKSObject = jdks.loads(urldecode(kv[1]), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 											if JDKSObject:
-												self.urlencode["RequestBody"]["multipart"]["headers"][kv[0]] = True
-												params.set(name+self.separator+"headers"+self.separator+kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+												self.urlencode["RequestBody"]["multipart"][name]["headers"][kv[0]] = True
+												params.set(name+self.separator+"headers"+self.separator+kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 											else:
-												params.set(name+self.separator+"headers"+self.separator+kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+												params.set(name+self.separator+"headers"+self.separator+kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 
 								# Value
 								v = re.split("\r\n\r\n|\n\n", multipart_param, 1)[-1]
 								JDKSObject = jdks.loads(v, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 								if JDKSObject:
-									params.update(name+self.separator+"value", JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+									params.update(name+self.separator+"value", JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 								else:
 									JDKSObject = jdks.loads(urldecode(v), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 									if JDKSObject:
-										self.urlencode["RequestBody"]["multipart"]["value"] = True
-										params.update(name+self.separator+"value", JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+										self.urlencode["RequestBody"]["multipart"][name]["value"] = True
+										params.update(name+self.separator+"value", JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 									else:
-										params.update(name+self.separator+"value", v, separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+										params.update(name+self.separator+"value", v, separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 
 							self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "multipart", "boundary": boundary[2:], "data": params.getObject() })
 						except Exception as e:
 							self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "unknown", "data": reqBody })
 					elif re.match("^application/x-www-form-urlencoded", self.request_headers.get("Content-Type", case_insensitive=True)["value"]):
+						self.urlencode["RequestBody"]["form-urlencoded"] = {}
 						params = jdks.loads("{}", ordered_dict=self.ordered_dict)
 
 						for NameValue in reqBody.split("&"):
@@ -221,20 +224,27 @@ class TP_HTTP_REQUEST_PARSER:
 							if len(kv) == 2:
 								JDKSObject = jdks.loads(kv[1], dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 								if JDKSObject:
-									params.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+									params.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 								else:
 									JDKSObject = jdks.loads(urldecode(kv[1]), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 									if JDKSObject:
 										self.urlencode["RequestBody"]["form-urlencoded"][kv[0]] = True
-										params.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+										params.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 									else:
-										params.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+										params.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 							else:
-								params.set(kv[0], "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+								params.set(kv[0], "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 
 						self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "form-urlencoded", "data": params.getObject() })
 					else:
-						self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "unknown", "data": reqBody })
+						if Utils.XML2JSON(reqBody, ordered_dict=self.ordered_dict):
+							self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "xml", "data": Utils.XML2JSON(reqBody, ordered_dict=self.ordered_dict) })
+						else:
+							if Utils.XML2JSON(urldecode(reqBody), ordered_dict=self.ordered_dict):
+								self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "xml", "data": Utils.XML2JSON(urldecode(reqBody), ordered_dict=self.ordered_dict) })
+								self.urlencode["RequestBody"]["xml"] = True
+							else:
+								self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "unknown", "data": reqBody })
 			else:
 				# No body
 				self.request_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": None, "data": None })
@@ -276,33 +286,35 @@ class TP_HTTP_REQUEST_PARSER:
 		# Final fallback: replace invalid chars
 		return data.decode("utf8", errors="replace")
 
-	def unparse(self, update_content_length=False):
+	def unparse(self, Coding="utf8", update_content_length=False):
 		method = path = queryParams = fragment = httpVersion = headers = cookies = body = ""
 
 		if type(self.request_method) == str:
-			method = urlencode(self.request_method)
+			method = self.request_method
 		elif type(self.request_method) == unicode:
-			method = urlencode(self.request_method.decode("utf8").encode("utf8"))
+			method = self.request_method.decode("utf8").encode("utf8")
 		elif type(self.request_method) == bytes:
-			method = urlencode(self.bytes_to_string(self.request_method))
+			method = self.bytes_to_string(self.request_method)
 		else:
-			method = urlencode(str(self.request_method))
+			method = str(self.request_method)
+		method = method.replace(" ", "%20").replace("\r", "%0d").replace("\n", "%0a").replace("\t", "%09").replace("\x0b", "%0b").replace("\x0c", "%0c")
 
 		try:
 			if isinstance(self.request_paths, jdks.JSON_DUPLICATE_KEYS):
 				for pathPart in self.request_paths.getObject():
 					if type(pathPart) in [OrderedDict, dict, list]:
-						path += "/"+urlencode(jdks.JSON_DUPLICATE_KEYS(pathPart).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
+						path += "/"+urlencode(jdks.JSON_DUPLICATE_KEYS(pathPart).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)).replace("/", "%2f")
 					elif type(pathPart) == str:
-						path += "/"+urlencode(pathPart)
+						path += "/"+pathPart.replace("/", "%2f")
 					elif type(pathPart) == unicode:
-						path += "/"+urlencode(pathPart.decode("utf8").encode("utf8"))
+						path += "/"+pathPart.decode("utf8").encode("utf8").replace("/", "%2f")
 					elif type(pathPart) == bytes:
-						path += "/"+urlencode(self.bytes_to_string(pathPart))
+						path += "/"+self.bytes_to_string(pathPart).replace("/", "%2f")
 					else:
-						path += "/"+urlencode(str(pathPart))
+						path += "/"+str(pathPart).replace("/", "%2f")
 		except Exception as e: pass
 		if len(path) == 0: path = "/"
+		path = path.replace(" ", "%20").replace("?", "%3f").replace("#", "%23").replace("\r", "%0d").replace("\n", "%0a").replace("\t", "%09").replace("\x0b", "%0b").replace("\x0c", "%0c")
 
 		try:
 			if isinstance(self.request_queryParams, jdks.JSON_DUPLICATE_KEYS):
@@ -311,37 +323,40 @@ class TP_HTTP_REQUEST_PARSER:
 					if type(k) in [unicode, str]:
 						Jget = self.request_queryParams.get(k)
 						if type(Jget["value"]) in [OrderedDict, dict, list]:
-							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))))
+							query.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)).replace("&", "%26")))
 						elif type(Jget["value"]) == str:
-							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(Jget["value"])))
+							query.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=Jget["value"].replace("&", "%26")))
 						elif type(Jget["value"]) == unicode:
-							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(Jget["value"].decode("utf8").encode("utf8"))))
+							query.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=Jget["value"].decode("utf8").encode("utf8").replace("&", "%26")))
 						elif type(Jget["value"]) == bytes:
-							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(self.bytes_to_string(Jget["value"]))))
+							query.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=self.bytes_to_string(Jget["value"]).replace("&", "%26")))
 						else:
-							query.append("{key}={value}".format(key=urlencode(jdks.normalize_key(k)), value=urlencode(str(Jget["value"]))))
+							query.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=str(Jget["value"]).replace("&", "%26")))
 				queryParams = "&".join(query)
+				queryParams = queryParams.replace(" ", "%20").replace("#", "%23").replace("\r", "%0d").replace("\n", "%0a").replace("\t", "%09").replace("\x0b", "%0b").replace("\x0c", "%0c")
 		except Exception as e: pass
 		if len(queryParams) > 0: queryParams = "?"+queryParams
 
 		if len(self.request_fragment) > 0:
 			if type(self.request_fragment) == str:
-				fragment = "#"+urlencode(self.request_fragment)
+				fragment = "#"+self.request_fragment
 			elif type(self.request_fragment) == unicode:
-				fragment = "#"+urlencode(self.request_fragment.decode("utf8").encode("utf8"))
+				fragment = "#"+self.request_fragment.decode("utf8").encode("utf8")
 			elif type(self.request_fragment) == bytes:
-				fragment = "#"+urlencode(self.bytes_to_string(self.request_fragment))
+				fragment = "#"+self.bytes_to_string(self.request_fragment)
 			else:
-				fragment = "#"+urlencode(str(self.request_fragment))
+				fragment = "#"+str(self.request_fragment)
+			fragment = fragment.replace(" ", "%20").replace("\r", "%0d").replace("\n", "%0a").replace("\t", "%09").replace("\x0b", "%0b").replace("\x0c", "%0c")
 
 		if type(self.request_httpVersion) == str:
-			httpVersion = urlencode(self.request_httpVersion)
+			httpVersion = self.request_httpVersion
 		elif type(self.request_httpVersion) == unicode:
-			httpVersion = urlencode(self.request_httpVersion.decode("utf8").encode("utf8"))
+			httpVersion = self.request_httpVersion.decode("utf8").encode("utf8")
 		elif type(self.request_httpVersion) == bytes:
-			httpVersion = urlencode(self.bytes_to_string(self.request_httpVersion))
+			httpVersion = self.bytes_to_string(self.request_httpVersion)
 		else:
-			httpVersion = urlencode(str(self.request_httpVersion))
+			httpVersion = str(self.request_httpVersion)
+		httpVersion = httpVersion.replace(" ", "%20").replace("\r", "%0d").replace("\n", "%0a").replace("\t", "%09").replace("\x0b", "%0b").replace("\x0c", "%0c")
 
 		try:
 			if isinstance(self.request_body, jdks.JSON_DUPLICATE_KEYS):
@@ -354,36 +369,39 @@ class TP_HTTP_REQUEST_PARSER:
 						body = jdks.JSON_DUPLICATE_KEYS(Jget_data["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)
 				elif Jget_dataType["value"] == "multipart":
 					for paramName in Jget_data["value"]:
-						body += "--"+self.request_body.get("boundary")["value"]
-						body += '\r\nContent-Disposition: form-data; name="'+paramName+'"'
-						if "filename" in Jget_data["value"][paramName].keys():
-							body += '; filename="'+Jget_data["value"][paramName]["filename"]+'"'
+						try:
+							body += "--"+self.request_body.get("boundary")["value"]
+							body += '\r\nContent-Disposition: form-data; name="'+jdks.normalize_key(paramName)+'"'
+							if "filename" in Jget_data["value"][paramName].keys():
+								body += '; filename="'+Jget_data["value"][paramName]["filename"]+'"'
 
-						for h in Jget_data["value"][paramName]["headers"]:
-							if type(h) in [unicode, str]:
-								if type(Jget_data["value"][paramName]["headers"][h]) in [OrderedDict, dict, list]:
-									if jdks.normalize_key(h) in self.urlencode["RequestBody"]["multipart"]["headers"]:
-										body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["headers"][h]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)))
+							for h in Jget_data["value"][paramName]["headers"]:
+								if type(h) in [unicode, str]:
+									if type(Jget_data["value"][paramName]["headers"][h]) in [OrderedDict, dict, list]:
+										if jdks.normalize_key(h) in self.urlencode["RequestBody"]["multipart"][paramName]["headers"]:
+											body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["headers"][h]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)))
+										else:
+											body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["headers"][h]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
+									elif type(Jget_data["value"][paramName]["headers"][h]) in [unicode, str]:
+										body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=Jget_data["value"][paramName]["headers"][h])
+									elif type(Jget_data["value"][paramName]["headers"][h]) == bytes:
+										body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=self.bytes_to_string(Jget_data["value"][paramName]["headers"][h]))
 									else:
-										body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["headers"][h]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
-								elif type(Jget_data["value"][paramName]["headers"][h]) in [unicode, str]:
-									body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=Jget_data["value"][paramName]["headers"][h])
-								elif type(Jget_data["value"][paramName]["headers"][h]) == bytes:
-									body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=self.bytes_to_string(Jget_data["value"][paramName]["headers"][h]))
-								else:
-									body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=str(Jget_data["value"][paramName]["headers"][h]))
+										body += "\r\n{key}: {value}".format(key=jdks.normalize_key(h), value=str(Jget_data["value"][paramName]["headers"][h]))
 
-						if type(Jget_data["value"][paramName]["value"]) in [OrderedDict, dict, list]:
-							if "value" in self.urlencode["RequestBody"]["multipart"]:
-								body += "\r\n\r\n"+urlencode(jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))+"\r\n"
+							if type(Jget_data["value"][paramName]["value"]) in [OrderedDict, dict, list]:
+								if "value" in self.urlencode["RequestBody"]["multipart"][paramName]:
+									body += "\r\n\r\n"+urlencode(jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))+"\r\n"
+								else:
+									body += "\r\n\r\n"+jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)+"\r\n"
+							elif type(Jget_data["value"][paramName]["value"]) in [unicode, str]:
+								body += "\r\n\r\n"+Jget_data["value"][paramName]["value"]+"\r\n"
+							elif type(Jget_data["value"][paramName]["value"]) == bytes:
+								body += "\r\n\r\n"+self.bytes_to_string(Jget_data["value"][paramName]["value"])+"\r\n"
 							else:
-								body += "\r\n\r\n"+jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][paramName]["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)+"\r\n"
-						elif type(Jget_data["value"][paramName]["value"]) in [unicode, str]:
-							body += "\r\n\r\n"+Jget_data["value"][paramName]["value"]+"\r\n"
-						elif type(Jget_data["value"][paramName]["value"]) == bytes:
-							body += "\r\n\r\n"+self.bytes_to_string(Jget_data["value"][paramName]["value"])+"\r\n"
-						else:
-							body += "\r\n\r\n"+str(Jget_data["value"][paramName]["value"])+"\r\n"
+								body += "\r\n\r\n"+str(Jget_data["value"][paramName]["value"])+"\r\n"
+						except Exception as e: 
+							body += "\r\n\r\n"
 
 					body += "--"+self.request_body.get("boundary")["value"]+"--\r\n"
 
@@ -398,16 +416,27 @@ class TP_HTTP_REQUEST_PARSER:
 						if type(k) in [unicode, str]:
 							if type(Jget_data["value"][k]) in [OrderedDict, dict, list]:
 								if jdks.normalize_key(k) in self.urlencode["RequestBody"]["form-urlencoded"]:
-									body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][k]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))))
+									body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][k]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)).replace("&", "%26")))
 								else:
-									body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][k]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)))
+									body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=jdks.JSON_DUPLICATE_KEYS(Jget_data["value"][k]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False).replace("&", "%26")))
 							elif type(Jget_data["value"][k]) in [unicode, str]:
-								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=Jget_data["value"][k]))
+								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=Jget_data["value"][k].replace("&", "%26")))
 							elif type(Jget_data["value"][k]) == bytes:
-								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=self.bytes_to_string(Jget_data["value"][k])))
+								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=self.bytes_to_string(Jget_data["value"][k]).replace("&", "%26")))
 							else:
-								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k), value=str(Jget_data["value"][k])))
+								body_urlencoded.append("{key}={value}".format(key=jdks.normalize_key(k).replace("&", "%26").replace("=", "%3d"), value=str(Jget_data["value"][k]).replace("&", "%26")))
 					body = "&".join(body_urlencoded)
+				elif Jget_dataType["value"] == "xml":
+					try:
+						if "xml" in self.urlencode["RequestBody"]:
+							body = urlencode(Utils.JSON2XML(Jget_data["value"]))
+						else:
+							body = Utils.JSON2XML(Jget_data["value"])
+					except Exception as e:
+						if type(Jget_data["value"]) == bytes:
+							body = self.bytes_to_string(Jget_data["value"])
+						else:
+							body = str(Jget_data["value"])
 				elif Jget_dataType["value"] == "unknown":
 					if type(Jget_data["value"]) == bytes:
 						body = self.bytes_to_string(Jget_data["value"])
@@ -416,7 +445,7 @@ class TP_HTTP_REQUEST_PARSER:
 		except Exception as e: pass
 
 		if update_content_length:
-			self.request_headers.update("Content-Length", len(body), allow_new_key=True, case_insensitive=True)
+			self.request_headers.update("Content-Length", len(body.encode(Coding)), allow_new_key=True, case_insensitive=True)
 
 		try:
 			if isinstance(self.request_cookies, jdks.JSON_DUPLICATE_KEYS):
@@ -425,17 +454,18 @@ class TP_HTTP_REQUEST_PARSER:
 						Jget = self.request_cookies.get(k)
 						if type(Jget["value"]) in [OrderedDict, dict, list]:
 							if jdks.normalize_key(k) in self.urlencode["HTTPCookies"]:
-								cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)))
+								cookies += "{key}={value}; ".format(key=jdks.normalize_key(k).replace("=", "%3d").replace(";", "%3b"), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)).replace(";", "%3b"))
 							else:
-								cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
+								cookies += "{key}={value}; ".format(key=jdks.normalize_key(k).replace("=", "%3d").replace(";", "%3b"), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False).replace(";", "%3b"))
 						elif type(Jget["value"]) in [unicode, str]:
-							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=Jget["value"])
+							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k).replace("=", "%3d").replace(";", "%3b"), value=Jget["value"].replace(";", "%3b"))
 						elif type(Jget["value"]) == bytes:
-							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=self.bytes_to_string(Jget["value"]))
+							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k).replace("=", "%3d").replace(";", "%3b"), value=self.bytes_to_string(Jget["value"]).replace(";", "%3b"))
 						else:
-							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k), value=str(Jget["value"]))
+							cookies += "{key}={value}; ".format(key=jdks.normalize_key(k).replace("=", "%3d").replace(";", "%3b"), value=str(Jget["value"]).replace(";", "%3b"))
 
 				if len(cookies) > 0:
+					cookies = cookies.replace("\r", "%0d").replace("\n", "%0a")
 					self.request_headers.update("Cookie", cookies[:-2], allow_new_key=True, case_insensitive=True)
 		except Exception as e: pass
 
@@ -446,15 +476,15 @@ class TP_HTTP_REQUEST_PARSER:
 						Jget = self.request_headers.get(k)
 						if type(Jget["value"]) in [OrderedDict, dict, list]:
 							if jdks.normalize_key(k) in self.urlencode["HTTPHeaders"]:
-								headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)))
+								headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k).replace("\r", "%0d").replace("\n", "%0a"), value=urlencode(jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)).replace("\r", "%0d").replace("\n", "%0a"))
 							else:
-								headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
+								headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k).replace("\r", "%0d").replace("\n", "%0a"), value=jdks.JSON_DUPLICATE_KEYS(Jget["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False).replace("\r", "%0d").replace("\n", "%0a"))
 						elif type(Jget["value"]) in [unicode, str]:
-							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=Jget["value"])
+							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k).replace("\r", "%0d").replace("\n", "%0a"), value=Jget["value"].replace("\r", "%0d").replace("\n", "%0a"))
 						elif type(Jget["value"]) == bytes:
-							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=self.bytes_to_string(Jget["value"]))
+							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k).replace("\r", "%0d").replace("\n", "%0a"), value=self.bytes_to_string(Jget["value"]).replace("\r", "%0d").replace("\n", "%0a"))
 						else:
-							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k), value=str(Jget["value"]))
+							headers += "\r\n{key}: {value}".format(key=jdks.normalize_key(k).replace("\r", "%0d").replace("\n", "%0a"), value=str(Jget["value"]).replace("\r", "%0d").replace("\n", "%0a"))
 		except Exception as e: pass
 
 		unparseRequest = method+" "+path+queryParams+fragment+" "+httpVersion+headers+"\r\n\r\n"+body
@@ -510,14 +540,14 @@ class TP_HTTP_RESPONSE_PARSER:
 					kv = re.findall("^([^:]+): (.*)$", header)[0]
 					JDKSObject = jdks.loads(kv[1], dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 					if JDKSObject:
-						self.response_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+						self.response_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 					else:
 						JDKSObject = jdks.loads(urldecode(kv[1]), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 						if JDKSObject:
 							self.urlencode["ResponseHeaders"][kv[0]] = True
-							self.response_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.response_headers.set(kv[0], JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 						else:
-							self.response_headers.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+							self.response_headers.set(kv[0], kv[1], separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 		except Exception as e: pass
 		##
 
@@ -529,16 +559,16 @@ class TP_HTTP_RESPONSE_PARSER:
 			if len(kv) == 2:
 				JDKSObject = jdks.loads(kv[1].strip(), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 				if JDKSObject:
-					self.response_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+					self.response_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 				else:
 					JDKSObject = jdks.loads(urldecode(kv[1].strip()), dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict, skipDuplicated=self.skipDuplicated)
 					if JDKSObject:
 						self.urlencode["ResponseCookies"][kv[1].strip()] = True
-						self.response_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+						self.response_cookies.set(kv[0].strip(), JDKSObject.getObject(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 					else:
-						self.response_cookies.set(kv[0].strip(), kv[1].strip(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+						self.response_cookies.set(kv[0].strip(), kv[1].strip(), separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 			else:
-				self.response_cookies.set(kv[0].strip(), "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, ordered_dict=self.ordered_dict)
+				self.response_cookies.set(kv[0].strip(), "", separator=self.separator, parse_index=self.parse_index, dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end)
 		##
 
 		## Response Body ##
@@ -557,7 +587,14 @@ class TP_HTTP_RESPONSE_PARSER:
 						self.urlencode["ResponseBody"]["json"] = True
 						self.response_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "json", "data": JDKSObject.getObject() })
 					else:
-						self.response_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "unknown", "data": resBody })
+						if Utils.XML2JSON(resBody, ordered_dict=self.ordered_dict):
+							self.response_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "xml", "data": Utils.XML2JSON(resBody, ordered_dict=self.ordered_dict) })
+						else:
+							if Utils.XML2JSON(urldecode(resBody), ordered_dict=self.ordered_dict):
+								self.response_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "xml", "data": Utils.XML2JSON(urldecode(resBody), ordered_dict=self.ordered_dict) })
+								self.urlencode["ResponseBody"]["xml"] = True
+							else:
+								self.response_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": "unknown", "data": resBody })
 			else:
 				# No body
 				self.response_body = jdks.JSON_DUPLICATE_KEYS({ "dataType": None, "data": None })
@@ -599,7 +636,7 @@ class TP_HTTP_RESPONSE_PARSER:
 		# Final fallback: replace invalid chars
 		return data.decode("utf8", errors="replace")
 
-	def unparse(self, update_content_length=False):
+	def unparse(self, Coding="utf8", update_content_length=False):
 		httpVersion = statusCode = statusText = headers = body = ""
 
 		if type(self.response_httpVersion) in [unicode, str]:
@@ -630,12 +667,20 @@ class TP_HTTP_RESPONSE_PARSER:
 						body = urlencode(jdks.JSON_DUPLICATE_KEYS(self.response_body.get("data")["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False))
 					else:
 						body = jdks.JSON_DUPLICATE_KEYS(self.response_body.get("data")["value"]).dumps(dupSign_start=self.dupSign_start, dupSign_end=self.dupSign_end, separators=(",",":"), ensure_ascii=False)
+				elif self.response_body.get("dataType")["value"] == "xml":
+					try:
+						if "xml" in self.urlencode["ResponseBody"]:
+							body = urlencode(Utils.JSON2XML(self.response_body.get("data")["value"]))
+						else:
+							body = Utils.JSON2XML(self.response_body.get("data")["value"])
+					except Exception as e:
+						body = self.response_body.get("data")["value"]
 				elif self.response_body.get("dataType")["value"] == "unknown":
 					body = self.response_body.get("data")["value"]
 		except Exception as e: pass
 
 		if update_content_length:
-			self.response_headers.update("Content-Length", len(body), allow_new_key=True, case_insensitive=True)
+			self.response_headers.update("Content-Length", len(body.encode(Coding)), allow_new_key=True, case_insensitive=True)
 
 		try:
 			if isinstance(self.response_headers, jdks.JSON_DUPLICATE_KEYS):

@@ -25,7 +25,7 @@
 # 🛠️ Installation
 #### From PyPI:
 ```console
-pip install tp-http-request-response-parser
+pip install TP-HTTP-Request-Response-Parser
 ```
 #### From Source:
 ```console
@@ -49,7 +49,7 @@ python -m pip install dist/tp_http_request_response_parser-<version>-py3-none-an
 - **unparse**: reconstructs the HTTP request string from the parsed data. If `update_content_length=True`, automatically updates the Content-Length header
 
 ```python
-from tp_http_request_response_parser import TP_HTTP_REQUEST_PARSER
+from TP_HTTP_Request_Response_Parser import TP_HTTP_REQUEST_PARSER
 
 rawRequest = """GET /v1/promo/extension HTTP/2
 Host: d2y7f743exec8w.cloudfront.net
@@ -87,7 +87,7 @@ print(RequestParser.unparse(update_content_length=True))
 - **unparse**: reconstructs the HTTP response string from the parsed data. If `update_content_length=True`, automatically updates the Content-Length header
 
 ```python
-from tp_http_request_response_parser import TP_HTTP_RESPONSE_PARSER
+from TP_HTTP_Request_Response_Parser import TP_HTTP_RESPONSE_PARSER
 
 rawResponse = """HTTP/2 200 OK
 Content-Type: application/json; charset=utf-8
@@ -123,6 +123,11 @@ print(ResponseParser.unparse(update_content_length=True))
 
 ---
 # 📝 CHANGELOG
+### [TP-HTTP-Request-Response-Parser v2026.5.18](https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser/tree/2026.5.18)
+- **New**: Support parsing and unparsing XML Request/ Response body
+- **Updated**: Handle errors when unparsing multipart/form-data and application/x-www-form-urlencoded request bodies with dict or list values
+- **Updated**: Fixed issues related to parsing and unparsing HTTP request/ response
+
 ### [TP-HTTP-Request-Response-Parser v2025.9.30](https://github.com/TPCyberSec/TP-HTTP-Request-Response-Parser/tree/2025.9.30)
 - **Updated**: Merged `request_path` and `request_pathParams` into `request_paths`. **request_paths**: returns the request path parts as JSON_DUPLICATE_KEYS object
 - **Updated**: Fixed issues related to encoding
