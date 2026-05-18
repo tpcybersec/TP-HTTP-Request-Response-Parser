@@ -1,1 +1,1 @@
-json-duplicate-keys>=2025.9.30
+TP-Generator>=2026.5.18
